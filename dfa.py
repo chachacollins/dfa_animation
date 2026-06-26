@@ -431,6 +431,58 @@ class S3_KeywordDFA(Scene):
         self.wait(1.5)
         self.play(FadeOut(Group(*self.mobjects)), run_time=0.7)
 
+class S3b_KeywordTrie(Scene):
+    def construct(self):
+        self.camera.background_color = C_BG
+
+        title = section_title('Keyword Trie  —  combining prefixes', color=C_KEYWORD)
+        self.play(FadeIn(title, shift=DOWN*0.1))
+
+        # Build Trie states
+        q0 = make_state("q0")
+        q1 = make_state("q1")
+        q2 = make_accept("q2")  # accepts "if"
+        q3 = make_accept("q3")  # accepts "in"
+        q4 = make_accept("q4")  # accepts "int"
+
+        # Position them in a branching tree layout
+        q0.move_to(LEFT * 4)
+        q1.move_to(LEFT * 1)
+        q2.move_to(RIGHT * 2 + UP * 1.5)
+        q3.move_to(RIGHT * 2 + DOWN * 1.5)
+        q4.move_to(RIGHT * 5 + DOWN * 1.5)
+
+        # Edges
+        e01 = edge(q0, q1, "i")
+        e12 = edge(q1, q2, "f")
+        e13 = edge(q1, q3, "n")
+        e34 = edge(q3, q4, "t")
+        s0  = start_arrow(q0)
+
+        trie = VGroup(q0, q1, q2, q3, q4, e01, e12, e13, e34, s0)
+        self.play(FadeIn(trie, shift=UP*0.1))
+        self.wait(0.5)
+
+        # Input banner showing "int"
+        banner, chars = input_banner("int")
+        self.play(FadeIn(banner))
+        self.wait(0.3)
+
+        # Animate: i → q1, n → q3, t → q4
+        self.play(chars[0].animate.set_color(C_KEYWORD), run_time=0.25)
+        animate_states(self, [q0, q1], C_KEYWORD)
+        self.wait(0.1)
+        
+        self.play(chars[1].animate.set_color(C_KEYWORD), run_time=0.25)
+        animate_states(self, [q1, q3], C_KEYWORD)
+        self.wait(0.1)
+
+        self.play(chars[2].animate.set_color(C_KEYWORD), run_time=0.25)
+        animate_states(self, [q3, q4], C_KEYWORD)
+
+        tok = emit_token(self, 'KEYWORD  "int"', C_KEYWORD)
+        self.wait(1.5)
+        self.play(FadeOut(Group(*self.mobjects)), run_time=0.7)
 # ══════════════════════════════════════════════════════════════════════════════
 # Scene 4 – Identifier DFA  ("x12")
 # ══════════════════════════════════════════════════════════════════════════════
@@ -604,7 +656,7 @@ class FullVideo(Scene):
     def construct(self):
         for SceneClass in [
             S1_Title, S1b_WhatIsCompilation, S2_Pipeline,
-            S2b_WhatIsDFA, S3_KeywordDFA, S4_IdentDFA,
+            S2b_WhatIsDFA, S3_KeywordDFA, S3b_KeywordTrie, S4_IdentDFA,
             S5_NumberDFA, S6_FullLexer
         ]:
             SceneClass.construct(self)
